@@ -6,16 +6,16 @@ import json
 import colorama
 
 colorama.init()
-nospam = False
-fullerrors = False
+NOSPAM = False
+FULLERRORS = False
 
 additional_logs = []
 
 if "--no-spam" in sys.argv or "-n" in sys.argv:
-    nospam = True
+    NOSPAM = True
 
 if "--traceback" in sys.argv or "-t" in sys.argv:
-    fullerrors = True
+    FULLERRORS = True
 
 for line in sys.stdin:
     log = line.strip().split("        ")
@@ -27,7 +27,8 @@ for line in sys.stdin:
         continue
 
     # Time and information recovery
-    time = colorama.Fore.CYAN + (": ".join(log[0].split(": ")[1:])).replace("T", " ").split(".")[0] + colorama.Fore.RESET
+    time = colorama.Fore.CYAN + ': '.join(log[0].split(': ', maxsplit=1)[1]).replace('T', ' ') \
+                                .split('.', maxsplit=1)[0] + colorama.Fore.RESET
 
     stat = log[1]
 
@@ -43,7 +44,7 @@ for line in sys.stdin:
     # P2P network
 
     if (log[2] == "P2PNetwork.ConnHandler") and log[3] == "Verified handshake nodeinfo":
-        if nospam:
+        if NOSPAM:
             continue
         data = json.loads(log[4])
         if "conn_dir" not in data.keys():
@@ -76,7 +77,7 @@ for line in sys.stdin:
     # Execution Client
 
     elif log[2] == "execution_client" and log[3] == "fetched registry events":
-        if nospam:
+        if NOSPAM:
             continue
         data = json.loads(log[4])
         tolog = f"Processed {colorama.Fore.LIGHTMAGENTA_EX}{data['events']}{colorama.Fore.RESET} registry events ({data['progress']} complete)"
@@ -99,7 +100,7 @@ for line in sys.stdin:
     # DutyScheduler
         
     elif log[2] == "DutyScheduler" and log[3] == "duty scheduler started":
-        tolog = f"Started Duty Scheduler"
+        tolog = "Started Duty Scheduler"
 
     elif log[2] == "DutyScheduler" and log[3] == "starting duty handler":
         data = json.loads(log[4])
@@ -107,7 +108,7 @@ for line in sys.stdin:
 
     # Controller
 
-    elif log[2] == "Controller.Validator" and "starting duty processing":
+    elif log[2] == "Controller.Validator" and log[3] == "starting duty processing":
         data = json.loads(log[4])
         role = data["role"]
         slot = data["slot"]
@@ -140,7 +141,7 @@ for line in sys.stdin:
         tolog = f"Applying {colorama.Fore.LIGHTBLUE_EX}{data['count']}{colorama.Fore.RESET} migrations"
 
     elif log[2] == "applied migrations successfully":
-        tolog = f"Applied migrations sucessfully"
+        tolog = "Applied migrations sucessfully"
 
     elif log[2] == "successfully setup operator keys":
         data = json.loads(log[3])
@@ -155,14 +156,14 @@ for line in sys.stdin:
         tolog = f"Connecting to consensus client at {colorama.Fore.MAGENTA}{data['version']}{colorama.Fore.RESET}"
 
     elif log[2] == "waiting until nodes are healthy":
-        tolog = f"Waiting until all clients are synced and healthy"
+        tolog = "Waiting until all clients are synced and healthy"
 
     elif log[2] == "ethereum node(s) are healthy":
-        tolog = f"All clients are synced and healthy"
+        tolog = "All clients are synced and healthy"
 
     elif log[2] == "historical registry sync stats":
         data = json.loads(log[3])
-        tolog = f"Network statistics: "
+        tolog = "Network statistics: "
         additional_logs.append(f"Operator ID           : {data['my_operator_id']}")
         additional_logs.append(f"Operators on network  : {data['operators']}")
         additional_logs.append(f"Validators on network : {data['validators']}")
@@ -170,7 +171,7 @@ for line in sys.stdin:
         additional_logs.append(f"Validators managed    : {data['my_validators']}")
 
     elif log[2] == "All required services are ready. OPERATOR SUCCESSFULLY CONFIGURED AND NOW RUNNING!":
-        tolog = f"Operator configured sucessfully"
+        tolog = "Operator configured sucessfully"
 
         additional_logs.append(f"{colorama.Fore.GREEN}╔═╗╔╦╗╔═╗╦═╗╔╦╗╦ ╦╔═╗  ╔═╗╦ ╦╔═╗╔═╗╔═╗╔═╗╔═╗{colorama.Fore.RESET}")
         additional_logs.append(f"{colorama.Fore.GREEN}╚═╗ ║ ╠═╣╠╦╝ ║ ║ ║╠═╝  ╚═╗║ ║║  ║  ║╣ ╚═╗╚═╗{colorama.Fore.RESET}")
@@ -192,7 +193,7 @@ for line in sys.stdin:
         node = data["node"]
         error = data["error"].replace('\\"', '"')
         tolog = f"Issue with {node}. {error}"
-        if fullerrors:
+        if FULLERRORS:
             verbose = data["errorVerbose"].replace('\\"', '"').replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
             tolog+= f"\nFull Traceback:\n{verbose}"
 
@@ -203,7 +204,7 @@ for line in sys.stdin:
             try:
                 data = json.loads(log[3])
                 tolog = f"{log[2]} - {data['error']}"
-                if fullerrors and "errorVerbose" in data.keys():
+                if FULLERRORS and "errorVerbose" in data.keys():
                     verbose = data["errorVerbose"].replace('\\"', '"').replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
                     tolog+= f"\nFull Traceback:\n{verbose}"
             except IndexError:
@@ -221,3 +222,4 @@ for line in sys.stdin:
         print(f"{time} {stat}: {i}")
 
     additional_logs = []
+    
