@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""A simple python string to parse SSV node logs and make them legible"""
+
+# pylint: disable=C0103
+
 import sys
 import json
 import colorama
@@ -28,7 +32,7 @@ for line in sys.stdin:
 
     # Time and information recovery
     time = colorama.Fore.CYAN + ': '.join(log[0].split(': ', maxsplit=1)[1]).replace('T', ' ') \
-                                .split('.', maxsplit=1)[0] + colorama.Fore.RESET
+        .split('.', maxsplit=1)[0] + colorama.Fore.RESET
 
     stat = log[1]
 
@@ -54,7 +58,8 @@ for line in sys.stdin:
         ip = (ip[1:]).split("/")
         ip = f"{ip[1]}:{ip[3]}"
         addr = data["peer_id"][:16] + "..."
-        tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{direction}{colorama.Fore.RESET} connection from {colorama.Fore.GREEN}{addr}@{ip}{colorama.Fore.RESET}"
+        tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{direction}{colorama.Fore.RESET}" + \
+            f" connection from {colorama.Fore.GREEN}{addr}@{ip}{colorama.Fore.RESET}"
 
     elif (log[2] == "P2PNetwork") and log[3] == "Verified handshake nodeinfo":
         continue
@@ -67,12 +72,13 @@ for line in sys.stdin:
 
     elif (log[2] == "P2PNetwork") and log[3] == "services configured":
         data = json.loads(log[4])
-        tolog = f"Configured P2P networking. Node id: {colorama.Fore.LIGHTMAGENTA_EX}{data['selfPeer'][:16]}...{colorama.Fore.RESET}"
+        tolog = f"Configured P2P networking. Node id: {colorama.Fore.LIGHTMAGENTA_EX}" + \
+            f"{data['selfPeer'][:16]}...{colorama.Fore.RESET}"
 
     elif (log[2] == "P2PNetwork") and log[3] == "discovery: using discv5":
         data = json.loads(log[4])
-        tolog = f"Using discv5 for discovery. Using {colorama.Fore.LIGHTMAGENTA_EX}{len(data['bootnodes'])}{colorama.Fore.RESET} bootnodes."
-    
+        tolog = f"Using discv5 for discovery. Using {colorama.Fore.LIGHTMAGENTA_EX}" + \
+            f"{len(data['bootnodes'])}{colorama.Fore.RESET} bootnodes."
 
     # Execution Client
 
@@ -80,31 +86,36 @@ for line in sys.stdin:
         if NOSPAM:
             continue
         data = json.loads(log[4])
-        tolog = f"Processed {colorama.Fore.LIGHTMAGENTA_EX}{data['events']}{colorama.Fore.RESET} registry events ({data['progress']} complete)"
-
+        tolog = f"Processed {colorama.Fore.LIGHTMAGENTA_EX}{data['events']}" + \
+            f"{colorama.Fore.RESET}registry events ({data['progress']} complete)"
 
     elif log[2] == "execution_client" and log[3] == "connected to execution client":
         data = json.loads(log[4])
-        tolog = f"Connected to execution client at {colorama.Fore.LIGHTMAGENTA_EX}{data['address']}{colorama.Fore.RESET} in {data['took']}"
-    
+        tolog = f"Connected to execution client at {colorama.Fore.LIGHTMAGENTA_EX}" + \
+            f"{data['address']}{colorama.Fore.RESET} in {data['took']}"
+
     # EventSyncer
-        
+
     elif log[2] == "EventSyncer" and log[3] == "subscribing to ongoing registry events":
         data = json.loads(log[4])
-        tolog = f"Subscribing to registry contract events after block {colorama.Fore.LIGHTMAGENTA_EX}{data['from_block']}{colorama.Fore.RESET}"
+        tolog = "Subscribing to registry contract events after block " + \
+            f"{colorama.Fore.LIGHTMAGENTA_EX}{data['from_block']}{colorama.Fore.RESET}"
 
     elif log[2] == "EventSyncer" and log[3] == "finished syncing historical events":
         data = json.loads(log[4])
-        tolog = f"Processing registry events from block {colorama.Fore.LIGHTMAGENTA_EX}{data['from_block']}{colorama.Fore.RESET} to {colorama.Fore.LIGHTMAGENTA_EX}{data['last_processed_block']}{colorama.Fore.RESET}"
-   
+        tolog = f"Processing registry events from block {colorama.Fore.LIGHTMAGENTA_EX}" + \
+            f"{data['from_block']}{colorama.Fore.RESET} to {colorama.Fore.LIGHTMAGENTA_EX}" + \
+            f"{data['last_processed_block']}{colorama.Fore.RESET}"
+
     # DutyScheduler
-        
+
     elif log[2] == "DutyScheduler" and log[3] == "duty scheduler started":
         tolog = "Started Duty Scheduler"
 
     elif log[2] == "DutyScheduler" and log[3] == "starting duty handler":
         data = json.loads(log[4])
-        tolog = f"Started {colorama.Fore.GREEN}{data['handler'].replace('_', ' ').lower()}{colorama.Fore.RESET} duty scheduler"
+        tolog = f"Started {colorama.Fore.GREEN}{data['handler'].replace('_', ' ').lower()}" + \
+            f"{colorama.Fore.RESET} duty scheduler"
 
     # Controller
 
@@ -113,47 +124,65 @@ for line in sys.stdin:
         role = data["role"]
         slot = data["slot"]
         validator = data["pubkey"][:6] + "..."
-        tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET} duty at slot {colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET} for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
-    
+        tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
+            f" duty at slot {colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
+            f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
+
     elif log[2] == "Controller" and log[3] == "starting validators setup...":
         data = json.loads(log[4])
-        tolog = f"Configuring {colorama.Fore.YELLOW}{data['shares count']}{colorama.Fore.RESET} validators."
+        tolog = f"Configuring {colorama.Fore.YELLOW}{data['shares count']}" + \
+            f"{colorama.Fore.RESET} validators."
 
     elif log[2] == "Controller" and log[3] == "skipping validator until it becomes active":
         data = json.loads(log[4])
-        tolog = f"Skipping setup for validator {colorama.Fore.RED}{data['pubkey'][:8]}{colorama.Fore.RESET} due to inactivity."
+        tolog = f"Skipping setup for validator {colorama.Fore.RED}{data['pubkey'][:8]}" + \
+            f"{colorama.Fore.RESET} due to inactivity."
 
     elif log[2] == "Controller" and log[3] == "setup validators done":
         data = json.loads(log[4])
-        tolog = f"Complete configuration for {colorama.Fore.MAGENTA}{data['shares']}{colorama.Fore.RESET} validators."
-        additional_logs.append(f"Successfully configured and started {colorama.Fore.GREEN}{data['started']}{colorama.Fore.RESET} validators")
-        additional_logs.append(f"Unable to configure {colorama.Fore.RED}{data['missing_metadata']}{colorama.Fore.RESET} validator{'s' if data['missing_metadata'] != 1 else ''} due to missing metadata or inactivity")
-        additional_logs.append(f"Failed to configure {colorama.Fore.RED}{data['failures']}{colorama.Fore.RESET} validator{'s' if data['missing_metadata'] != 1 else ''}")
+        tolog = f"Complete configuration for {colorama.Fore.MAGENTA}{data['shares']}" + \
+            f"{colorama.Fore.RESET} validators."
+
+        additional_logs.append(f"Successfully configured and started {colorama.Fore.GREEN}" + \
+            f"{data['started']}{colorama.Fore.RESET} validators")
+
+        additional_logs.append(f"Unable to configure {colorama.Fore.RED}" + \
+            f"{data['missing_metadata']}{colorama.Fore.RESET} validator" + \
+            f"{'s' if data['missing_metadata'] != 1 else ''} due to missing metadata or inactivity")
+
+        additional_logs.append(f"Failed to configure {colorama.Fore.RED}{data['failures']}" + \
+            f"{colorama.Fore.RESET} validator{'s' if data['missing_metadata'] != 1 else ''}")
 
     # Miscellaneous log handling
-        
+
     elif log[2] == "setting ssv network":
         data = json.loads(log[3])
-        tolog = f"Configuring SSV node for running on {colorama.Fore.MAGENTA}{data['network']}{colorama.Fore.RESET} with MEV {colorama.Fore.MAGENTA}{data['builderProposals(MEV)']}{colorama.Fore.RESET}"
+        tolog = f"Configuring SSV node for running on {colorama.Fore.MAGENTA}" + \
+            f"{data['network']}{colorama.Fore.RESET} with MEV {colorama.Fore.MAGENTA}" + \
+            f"{data['builderProposals(MEV)']}{colorama.Fore.RESET}"
 
     elif log[2] == "applying migrations":
         data = json.loads(log[3])
-        tolog = f"Applying {colorama.Fore.LIGHTBLUE_EX}{data['count']}{colorama.Fore.RESET} migrations"
+        tolog = f"Applying {colorama.Fore.LIGHTBLUE_EX}{data['count']}" + \
+            f"{colorama.Fore.RESET} migrations"
 
     elif log[2] == "applied migrations successfully":
         tolog = "Applied migrations sucessfully"
 
     elif log[2] == "successfully setup operator keys":
         data = json.loads(log[3])
-        tolog = f"Set up operator key ({colorama.Fore.MAGENTA}{data['pubkey'][16:]}{colorama.Fore.RESET})"
+        tolog = f"Set up operator key ({colorama.Fore.MAGENTA}{data['pubkey'][16:]}" + \
+            f"{colorama.Fore.RESET})"
 
     elif log[2] == "consensus client: connecting":
         data = json.loads(log[3])
-        tolog = f"Connecting to consensus client at {colorama.Fore.MAGENTA}{data['address']}{colorama.Fore.RESET}"
+        tolog = f"Connecting to consensus client at {colorama.Fore.MAGENTA}" + \
+            f"{data['address']}{colorama.Fore.RESET}"
 
     elif log[2] == "consensus client connected":
         data = json.loads(log[3])
-        tolog = f"Connecting to consensus client at {colorama.Fore.MAGENTA}{data['version']}{colorama.Fore.RESET}"
+        tolog = f"Connecting to consensus client at {colorama.Fore.MAGENTA}" + \
+            f"{data['version']}{colorama.Fore.RESET}"
 
     elif log[2] == "waiting until nodes are healthy":
         tolog = "Waiting until all clients are synced and healthy"
@@ -170,22 +199,28 @@ for line in sys.stdin:
         additional_logs.append(f"Liquidated Validators : {data['liquidated_validators']}")
         additional_logs.append(f"Validators managed    : {data['my_validators']}")
 
-    elif log[2] == "All required services are ready. OPERATOR SUCCESSFULLY CONFIGURED AND NOW RUNNING!":
+    elif log[2] == "All required services are ready. " + \
+            "OPERATOR SUCCESSFULLY CONFIGURED AND NOW RUNNING!":  
         tolog = "Operator configured sucessfully"
 
-        additional_logs.append(f"{colorama.Fore.GREEN}╔═╗╔╦╗╔═╗╦═╗╔╦╗╦ ╦╔═╗  ╔═╗╦ ╦╔═╗╔═╗╔═╗╔═╗╔═╗{colorama.Fore.RESET}")
-        additional_logs.append(f"{colorama.Fore.GREEN}╚═╗ ║ ╠═╣╠╦╝ ║ ║ ║╠═╝  ╚═╗║ ║║  ║  ║╣ ╚═╗╚═╗{colorama.Fore.RESET}")
-        additional_logs.append(f"{colorama.Fore.GREEN}╚═╝ ╩ ╩ ╩╩╚═ ╩ ╚═╝╩    ╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝{colorama.Fore.RESET}")
+        additional_logs.append(f"{colorama.Fore.GREEN}" + \
+            f"╔═╗╔╦╗╔═╗╦═╗╔╦╗╦ ╦╔═╗  ╔═╗╦ ╦╔═╗╔═╗╔═╗╔═╗╔═╗{colorama.Fore.RESET}")
+        additional_logs.append(f"{colorama.Fore.GREEN}" + \
+            f"╚═╗ ║ ╠═╣╠╦╝ ║ ║ ║╠═╝  ╚═╗║ ║║  ║  ║╣ ╚═╗╚═╗{colorama.Fore.RESET}")
+        additional_logs.append(f"{colorama.Fore.GREEN}" + \
+            f"╚═╝ ╩ ╩ ╩╩╚═ ╩ ╚═╝╩    ╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝╚═╝{colorama.Fore.RESET}")
 
     elif log[2] == "going to submit batch validator registrations":
         data = json.loads(log[3])
-        tolog = f"Planning to submit {colorama.Fore.MAGENTA}{data['count']}{colorama.Fore.RESET} validator registrations"
+        tolog = f"Planning to submit {colorama.Fore.MAGENTA}{data['count']}" + \
+            f"{colorama.Fore.RESET} validator registrations"
 
     elif log[2] == "submitted batched validator registrations":
         data = json.loads(log[3])
-        tolog = f"Submitted {colorama.Fore.MAGENTA}{data['count']}{colorama.Fore.RESET} validator registrations"
+        tolog = f"Submitted {colorama.Fore.MAGENTA}{data['count']}{colorama.Fore.RESET}" + \
+            " validator registrations"
 
-        
+
     # Specific Error Handling
 
     elif "node is not healthy" in log[2]:
@@ -194,7 +229,8 @@ for line in sys.stdin:
         error = data["error"].replace('\\"', '"')
         tolog = f"Issue with {node}. {error}"
         if FULLERRORS:
-            verbose = data["errorVerbose"].replace('\\"', '"').replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
+            verbose = data["errorVerbose"].replace('\\"', '"').replace('\\n', '\n') \
+                .replace('\\r', '\r').replace('\\t', '\t')
             tolog+= f"\nFull Traceback:\n{verbose}"
 
     # Generic Error handling and fallback
@@ -205,7 +241,8 @@ for line in sys.stdin:
                 data = json.loads(log[3])
                 tolog = f"{log[2]} - {data['error']}"
                 if FULLERRORS and "errorVerbose" in data.keys():
-                    verbose = data["errorVerbose"].replace('\\"', '"').replace('\\n', '\n').replace('\\r', '\r').replace('\\t', '\t')
+                    verbose = data["errorVerbose"].replace('\\"', '"').replace('\\n', '\n') \
+                        .replace('\\r', '\r').replace('\\t', '\t')
                     tolog+= f"\nFull Traceback:\n{verbose}"
             except IndexError:
                 tolog = f"{log[2]}"
@@ -222,4 +259,3 @@ for line in sys.stdin:
         print(f"{time} {stat}: {i}")
 
     additional_logs = []
-    
