@@ -130,13 +130,22 @@ def main():
 
         # Controller
 
-        elif log[2] == "Controller.Validator" and log[3] == "starting duty processing":
+        elif log[2] == "Controller.Validator" and "starting duty processing" in log[3]:
             data = json.loads(log[4])
             role = data["role"]
             slot = data["slot"]
             validator = data["pubkey"][:6] + "..."
             tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
                 f" duty at slot {colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
+                f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
+            
+        elif log[2] == "Controller.Validator" and "successfully submitted attestation" in log[3]:
+            data = json.loads(log[4])
+            role = data["role"]
+            slot = data["slot"]
+            validator = data["pubkey"][:6] + "..."
+            tolog = "Sucessfully submitted attestation at slot " + \
+                f"{colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
                 f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
 
         elif log[2] == "Controller" and log[3] == "starting validators setup...":
