@@ -14,7 +14,7 @@ authors = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License v2.0", # Check classifier format as it might be incorrect
+    "License :: OSI Approved :: Apache Software License", # Check classifier format as it might be incorrect
     "Operating System :: OS Independent",
 ]
 keywords = ["SSV", "logging"]
