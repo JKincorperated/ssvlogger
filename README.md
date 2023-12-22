@@ -1,4 +1,5 @@
 # SSV logger
+
 A simple tool to make the SSV node's logs easier to view.
 
 ## Dependencies
@@ -17,7 +18,6 @@ python3 -m pip install ssvlogger
 ### Configure the SSV docker container to use journal for logging
 
 To tell docker to use journal as its log engine you can append `--log-driver=journald` to the docker run command.
-
 
 This is an example command you could use
 
@@ -40,7 +40,7 @@ To use the logger you can pipe the output into the python script using:
 
 ## Additional Flags
 
-You can also use different flags to disable or enable certain features in the script 
+You can also use different flags to disable or enable certain features in the script
 
 |short command|long command|description|
 |-|-|-|
