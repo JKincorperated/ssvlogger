@@ -21,6 +21,9 @@ if "--no-spam" in sys.argv or "-n" in sys.argv:
 if "--traceback" in sys.argv or "-t" in sys.argv:
     FULLERRORS = True
 
+if __name__ != "__main__":
+    sys.exit(0)
+
 for line in sys.stdin:
     log = line.strip().split("        ")
 

@@ -6,11 +6,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='ssvlogger',
-    version='1.0',
+    version='1.0.0',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'mycommand = ssvlogger.logger:main'
+            'ssvlogger = ssvlogger.logger:main'
         ]
     },
     # metadata for upload to PyPI
