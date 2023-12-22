@@ -28,6 +28,8 @@ def extract_time_and_stat(log):
 
     return time, stat
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+
 def main():
     """Main function"""
 
@@ -69,7 +71,8 @@ def main():
             ip = (ip[1:]).split("/")
             ip = f"{ip[1]}:{ip[3]}"
             addr = data["peer_id"][:16] + "..."
-            tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{direction}{colorama.Fore.RESET}" + \
+            tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}" + \
+                f"{direction}{colorama.Fore.RESET}" + \
                 f" connection from {colorama.Fore.GREEN}{addr}@{ip}{colorama.Fore.RESET}"
 
         elif (log[2] == "P2PNetwork") and log[3] == "Verified handshake nodeinfo":
@@ -138,7 +141,7 @@ def main():
             tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
                 f" duty at slot {colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
                 f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
-            
+
         elif log[2] == "Controller.Validator" and "successfully submitted attestation" in log[3]:
             data = json.loads(log[4])
             role = data["role"]
@@ -168,7 +171,8 @@ def main():
 
             additional_logs.append(f"Unable to configure {colorama.Fore.RED}" + \
                 f"{data['missing_metadata']}{colorama.Fore.RESET} validator" + \
-                f"{'s' if data['missing_metadata'] != 1 else ''} due to missing metadata or inactivity")
+                f"{'s' if data['missing_metadata'] != 1 else ''}" + \
+                " due to missing metadata or inactivity")
 
             additional_logs.append(f"Failed to configure {colorama.Fore.RED}{data['failures']}" + \
                 f"{colorama.Fore.RESET} validator{'s' if data['missing_metadata'] != 1 else ''}")
