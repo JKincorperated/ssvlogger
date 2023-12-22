@@ -9,10 +9,7 @@ A simple tool to make the SSV node's logs easier to view.
 ## Installation
 
 ```bash
-# Install dependency
-python3 -m pip install colorama
-# Download python script to local bin
-wget [URL] -O /usr/local/bin/ssvlogger
+python3 -m pip install ssvlogger
 ```
 
 ## How to use
