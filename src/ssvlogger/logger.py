@@ -31,6 +31,18 @@ def extract_time_and_stat(log):
 # pylint: disable=too-many-locals,too-many-branches,too-many-statements
 
 def main():
+    """Error handling function and soft exit"""
+
+    try:
+        main_function()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(0)
+    except Exception as error:
+        print(f"{colorama.Fore.RED}Error: {error}{colorama.Fore.RESET}")
+        sys.exit(1)
+
+def main_function():
     """Main function"""
 
     colorama.init()
@@ -277,7 +289,7 @@ def main():
 
         except json.decoder.JSONDecodeError or IndexError:
             tolog = "        ".join(log[2:])
-            
+
         # Print log to stdout
 
         print(f"{time} {stat}: {tolog}")
