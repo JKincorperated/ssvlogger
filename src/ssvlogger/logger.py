@@ -270,6 +270,8 @@ def main():
                         tolog+= f"\nFull Traceback:\n{verbose}"
                 except IndexError:
                     tolog = f"{log[2]}"
+                except json.decoder.JSONDecodeError:
+                    tolog = f"{log[2]} - {log[3]}"
             else:
                 tolog = "        ".join(log[2:])
 
