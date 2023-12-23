@@ -287,7 +287,9 @@ def main_function():
                 else:
                     tolog = "        ".join(log[2:])
 
-        except json.decoder.JSONDecodeError or IndexError:
+        except json.decoder.JSONDecodeError:
+            tolog = "        ".join(log[2:])
+        except IndexError:
             tolog = "        ".join(log[2:])
 
         # Print log to stdout
