@@ -3,7 +3,7 @@
 
 """A simple python string to parse SSV node logs and make them legible"""
 
-# pylint: disable=C0103, C0301, W0718, R1702, 
+# pylint: disable=C0103, C0301, W0718, R1702
 
 import sys
 import json
