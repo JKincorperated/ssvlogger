@@ -4,17 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ssvlogger"
-version = "1.0.4"
+version = "1.1.0"
 description = "A simple python package to parse SSV node logs and make them legible"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file="LICENSE" } # Assuming the license is in a file named LICENSE
 authors = [
-    { name = "JKinc", email = "your.email@example.com" }, # Added author email from setup.py
+    { name = "JKinc"},
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License", # Check classifier format as it might be incorrect
+    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 keywords = ["SSV", "logging"]
