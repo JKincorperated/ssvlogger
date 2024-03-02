@@ -3,7 +3,7 @@
 
 """A simple python string to parse SSV node logs and make them legible"""
 
-# pylint: disable=C0103
+# pylint: disable=C0103, C0301, W0718
 
 import sys
 import json
@@ -143,6 +143,11 @@ def main_function():
                 data = json.loads(log[4])
                 tolog = f"Started {colorama.Fore.GREEN}{data['handler'].replace('_', ' ').lower()}" + \
                     f"{colorama.Fore.RESET} duty scheduler"
+                
+            elif log[2] == "DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
+                data = json.loads(log[4])
+                tolog = f"Failed to submit {colorama.Fore.CYAN}{data['handler']}{colorama.Fore.RESET} job.\n"
+                tolog += f"Error: " + data['error'].replace('\\"', '"')
 
             # Controller
 
@@ -172,7 +177,7 @@ def main_function():
             elif log[2] == "Controller" and log[3] == "skipping validator until it becomes active":
                 data = json.loads(log[4])
                 tolog = f"Skipping setup for validator {colorama.Fore.RED}{data['pubkey'][:8]}" + \
-                    f"{colorama.Fore.RESET} due to inactivity."
+                    f"{colorama.Fore.RESET} until it becomes active on beacon chain."
 
             elif log[2] == "Controller" and log[3] == "setup validators done":
                 data = json.loads(log[4])
@@ -182,13 +187,21 @@ def main_function():
                 additional_logs.append(f"Successfully configured and started {colorama.Fore.GREEN}" + \
                     f"{data['started']}{colorama.Fore.RESET} validators")
 
-                additional_logs.append(f"Unable to configure {colorama.Fore.RED}" + \
+                additional_logs.append(f"Failed to configure {colorama.Fore.RED}{data['failures']}" + \
+                    f"{colorama.Fore.RESET} validator{'s' if data['failures'] != 1 else ''}")
+ 
+            elif log[2] == "Controller" and log[3] == "init validators done":
+                data = json.loads(log[4])
+                tolog = f"Completed initialization for {colorama.Fore.MAGENTA}{data['shares']}" + \
+                    f"{colorama.Fore.RESET} validators."
+
+                additional_logs.append(f"Unable to initialize {colorama.Fore.RED}" + \
                     f"{data['missing_metadata']}{colorama.Fore.RESET} validator" + \
                     f"{'s' if data['missing_metadata'] != 1 else ''}" + \
-                    " due to missing metadata or inactivity")
+                    " due to missing metadata or non-active status on beacon chain.")
 
-                additional_logs.append(f"Failed to configure {colorama.Fore.RED}{data['failures']}" + \
-                    f"{colorama.Fore.RESET} validator{'s' if data['missing_metadata'] != 1 else ''}")
+                additional_logs.append(f"Failed to initialize {colorama.Fore.RED}{data['failures']}" + \
+                    f"{colorama.Fore.RESET} validator{'s' if data['failures'] != 1 else ''}")
 
             # Miscellaneous log handling
 
@@ -256,6 +269,18 @@ def main_function():
                 data = json.loads(log[3])
                 tolog = f"Submitted {colorama.Fore.MAGENTA}{data['count']}{colorama.Fore.RESET}" + \
                     " validator registrations"
+                
+            elif log[2] == "could not submit proposal preparation batch":
+                data = json.loads(log[3])
+                tolog = "Failed to submit proposal preparation batch.\n"
+                tolog += f"Error: " + data['error'].replace('\\"', '"')
+
+            # Metrics
+
+            elif log[2] == "MetricsHandler" and log[3] == "setup collection":
+                data = json.loads(log[4])
+                tolog = f"Setting up metrics collection on address {colorama.Fore.LIGHTBLUE_EX}" + \
+                    f"{data['address']}{colorama.Fore.RESET}"
 
 
             # Specific Error Handling
@@ -302,3 +327,6 @@ def main_function():
             print(f"{time} {stat}: {i}")
 
         additional_logs = []
+
+if __name__ == "__main__":
+    main()
