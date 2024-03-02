@@ -3,7 +3,7 @@
 
 """A simple python string to parse SSV node logs and make them legible"""
 
-# pylint: disable=C0103, C0301, W0718
+# pylint: disable=C0103, C0301, W0718, R1702, 
 
 import sys
 import json
@@ -143,11 +143,11 @@ def main_function():
                 data = json.loads(log[4])
                 tolog = f"Started {colorama.Fore.GREEN}{data['handler'].replace('_', ' ').lower()}" + \
                     f"{colorama.Fore.RESET} duty scheduler"
-                
+
             elif log[2] == "DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
                 tolog = f"Failed to submit {colorama.Fore.CYAN}{data['handler']}{colorama.Fore.RESET} job.\n"
-                tolog += f"Error: " + data['error'].replace('\\"', '"')
+                tolog += "Error: " + data['error'].replace('\\"', '"')
 
             # Controller
 
@@ -189,7 +189,7 @@ def main_function():
 
                 additional_logs.append(f"Failed to configure {colorama.Fore.RED}{data['failures']}" + \
                     f"{colorama.Fore.RESET} validator{'s' if data['failures'] != 1 else ''}")
- 
+
             elif log[2] == "Controller" and log[3] == "init validators done":
                 data = json.loads(log[4])
                 tolog = f"Completed initialization for {colorama.Fore.MAGENTA}{data['shares']}" + \
@@ -269,11 +269,11 @@ def main_function():
                 data = json.loads(log[3])
                 tolog = f"Submitted {colorama.Fore.MAGENTA}{data['count']}{colorama.Fore.RESET}" + \
                     " validator registrations"
-                
+
             elif log[2] == "could not submit proposal preparation batch":
                 data = json.loads(log[3])
                 tolog = "Failed to submit proposal preparation batch.\n"
-                tolog += f"Error: " + data['error'].replace('\\"', '"')
+                tolog += "Error: " + data['error'].replace('\\"', '"')
 
             # Metrics
 
