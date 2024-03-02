@@ -15,7 +15,7 @@ python3 -m pip install ssvlogger
 
 ## How to use
 
-### Configure the SSV docker container to use journal for logging
+### With docker
 
 To tell docker to use journal as its log engine you can append `--log-driver=journald` to the docker run command.
 
@@ -23,11 +23,7 @@ This is an example command you could use
 
 ```bash
 docker run --restart unless-stopped --name ssv_node -e \
-CONFIG_PATH=/config.yaml -p 13001:13001 -p 12001:12001/udp -p 15000:15000 \
--v "$(pwd)/config.yaml":/config.yaml \
--v "$(pwd)":/data \
--v "$(pwd)/password":/password \
--v "$(pwd)/encrypted_private_key.json":/encrypted_private_key.json \
+.... # other flags
 --log-driver=journald \  # This is to set up journal as the logging handler for docker
 -it "bloxstaking/ssv-node:latest" make BUILD_PATH="/go/bin/ssvnode" start-node
 ```
@@ -37,6 +33,11 @@ After you have configure docker, you can view live logs from the SSV node with t
 
 To use the logger you can pipe the output into the python script using:
 `journalctl CONTAINER_NAME=ssv_node -f | ssvlogger`
+
+### Without docker
+
+If you do not use docker it will only work as a service, assuming you have a service called "ssv_node" you should run
+`journalctl -u ssv_node -f | ssvlogger`
 
 ## Additional Flags
 
