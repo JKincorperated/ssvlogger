@@ -48,7 +48,7 @@ def main_function():
     colorama.init()
     NOSPAM = False
     FULLERRORS = False
-    DOCKER_MODE = False
+    DOCKER_MODE = True
 
     if "--no-spam" in sys.argv or "-n" in sys.argv:
         NOSPAM = True
@@ -57,7 +57,7 @@ def main_function():
         FULLERRORS = True
 
     if "--journal" in sys.argv or "-j" in sys.argv:
-        DOCKER_MODE = True
+        DOCKER_MODE = False
 
     additional_logs = []
 
