@@ -170,7 +170,7 @@ def main_function():
 
             elif log[2] == "DutyScheduler" and log[3].startswith("malformed event"):
                 data = json.loads(log[4])
-                tolog = f"Malformed Event: {log[3].split(":")[1].strip()}. Transaction hash: {data['tx_hash']}"
+                tolog = f"Malformed Event: {log[3].split(':')[1].strip()}. Transaction hash: {data['tx_hash']}"
 
             elif log[2] == "DutyScheduler" and "indices change received" in log[3]:
                 data = json.loads(log[4])
