@@ -4,14 +4,16 @@
 """A simple python string to parse SSV node logs and make them legible"""
 
 # pylint: disable=C0103, C0301, W0718, R1702
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
+
 
 import sys
 import json
 import colorama
 
-def extract_time_and_stat(log):
+def extract_time_and_stat(log, DOCKER_MODE):
     """Extracts time and status from a log"""
-    time = log[0].split(': ', maxsplit=1)[1]
+    time = log[0].split(': ', maxsplit=1)[1] if not DOCKER_MODE else log[0]
     time = time.replace('T', ' ').split('.', maxsplit=1)[0]
     time = colorama.Fore.CYAN + time + colorama.Fore.RESET
 
@@ -27,8 +29,6 @@ def extract_time_and_stat(log):
         stat = colorama.Fore.RED + stat + colorama.Fore.RESET
 
     return time, stat
-
-# pylint: disable=too-many-locals,too-many-branches,too-many-statements
 
 def main():
     """Error handling function and soft exit"""
@@ -48,6 +48,7 @@ def main_function():
     colorama.init()
     NOSPAM = False
     FULLERRORS = False
+    DOCKER_MODE = False
 
     if "--no-spam" in sys.argv or "-n" in sys.argv:
         NOSPAM = True
@@ -55,10 +56,13 @@ def main_function():
     if "--traceback" in sys.argv or "-t" in sys.argv:
         FULLERRORS = True
 
+    if "--journal" in sys.argv or "-j" in sys.argv:
+        DOCKER_MODE = True
+
     additional_logs = []
 
     for line in sys.stdin:
-        log = line.strip().split("        ")
+        log = line.strip().replace("        ", "\t").split("\t")
 
         if "systemd[1]" in line: # Ignore systemd messages
             continue
@@ -68,7 +72,7 @@ def main_function():
 
         # Time and information recovery
 
-        time, stat = extract_time_and_stat(log)
+        time, stat = extract_time_and_stat(log, DOCKER_MODE)
 
         try:
             # P2P network
@@ -121,6 +125,16 @@ def main_function():
                 tolog = f"Connected to execution client at {colorama.Fore.LIGHTMAGENTA_EX}" + \
                     f"{data['address']}{colorama.Fore.RESET} in {data['took']}"
 
+            elif log[2] == "execution_client" and log[3] == "reconnecting":
+                data = json.loads(log[4])
+                tolog = f"Reconnecting to execution client at {colorama.Fore.LIGHTMAGENTA_EX}" + \
+                    f"{data['address']}{colorama.Fore.RESET}"
+
+            elif log[2] == "execution_client" and log[3] == "could not reconnect, still trying":
+                data = json.loads(log[4])
+                tolog = f"Reconnecting to execution client at {colorama.Fore.LIGHTMAGENTA_EX}" + \
+                    f"{data['address']}{colorama.Fore.RESET} ({data['error']})"
+
             # EventSyncer
 
             elif log[2] == "EventSyncer" and log[3] == "subscribing to ongoing registry events":
@@ -149,6 +163,20 @@ def main_function():
                 tolog = f"Failed to submit {colorama.Fore.CYAN}{data['handler']}{colorama.Fore.RESET} job.\n"
                 tolog += "Error: " + data['error'].replace('\\"', '"')
 
+            elif log[2] == "DutyScheduler" and log[3] == "could not find validator":
+                data = json.loads(log[4])
+                tolog = f"Failed to submit {colorama.Fore.CYAN}{data['handler']}{colorama.Fore.RESET} job " + \
+                    f"for validator {data['pubkey'][:8]} due to non-existant validator."
+
+            elif log[2] == "DutyScheduler" and log[3].startswith("malformed event"):
+                data = json.loads(log[4])
+                tolog = f"Malformed Event: {log[3].split(":")[1].strip()}. Transaction hash: {data['tx_hash']}"
+
+            elif log[2] == "DutyScheduler" and "indices change received" in log[3]:
+                data = json.loads(log[4])
+                tolog = f"Received indices change {data['handler']}"
+
+
             # Controller
 
             elif log[2] == "Controller.Validator" and "starting duty processing" in log[3]:
@@ -168,6 +196,19 @@ def main_function():
                 tolog = "Sucessfully submitted attestation at slot " + \
                     f"{colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
                     f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
+                
+            elif log[2] == "Controller.Validator" and "got beacon block proposal" in log[3]:
+                data = json.loads(log[4])
+                role = data["role"]
+                slot = data["slot"]
+                validator = data["pubkey"][:6] + "..."
+                tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
+                    f" duty at slot {colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
+                    f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
+
+            elif log[2] == "Controller.TaskExecutor" and "removed validator" in log[3]:
+                data = json.loads(log[4])
+                tolog = f"Removing validator {colorama.Fore.RED}{data['pubkey'][:8]}{colorama.Fore.RESET}"
 
             elif log[2] == "Controller" and log[3] == "starting validators setup...":
                 data = json.loads(log[4])
@@ -203,6 +244,32 @@ def main_function():
                 additional_logs.append(f"Failed to initialize {colorama.Fore.RED}{data['failures']}" + \
                     f"{colorama.Fore.RESET} validator{'s' if data['failures'] != 1 else ''}")
 
+            elif log[2] == "Controller" and log[3] == "failed to update validators metadata":
+                data = json.loads(log[4])
+                tolog = "Failed to update validator metadata"
+
+            elif log[2] == "Controller" and "dropping message because the queue is full" in log[3]:
+                data = json.loads(log[4])
+                tolog = f"Dropping {data['msg_type']} message because the queue is full."
+
+            elif log[2] == "Controller" and "starting new validator" in log[3]:
+                data = json.loads(log[4])
+                tolog = f"Starting new validator {colorama.Fore.MAGENTA}{data['pubKey'][:8]}{colorama.Fore.RESET}"
+
+            # EventHandler
+
+            elif log[2] == "EventHandler" and log[3] == "unknown event name":
+                data = json.loads(log[4])
+                tolog = f"Ignoring unknown event {colorama.Fore.RED}{data['name']}{colorama.Fore.RESET}"
+
+            elif log[2] == "EventHandler" and "malformed event: " in log[3]:
+                data = json.loads(log[4])
+                tolog = f"Malformed Event: {log[3].split(':')[1].strip()}. Transaction hash: {data['tx_hash']}"
+
+            elif log[2] == "EventHandler" and "could not parse event" in log[3]:
+                data = json.loads(log[4])
+                tolog = f"Failed to parse event {data['event']}"
+
             # Miscellaneous log handling
 
             elif log[2] == "setting ssv network":
@@ -222,6 +289,11 @@ def main_function():
             elif log[2] == "successfully setup operator keys":
                 data = json.loads(log[3])
                 tolog = f"Set up operator key ({colorama.Fore.MAGENTA}{data['pubkey'][16:]}" + \
+                    f"{colorama.Fore.RESET})"
+
+            elif log[2] == "successfully loaded operator keys":
+                data = json.loads(log[3])
+                tolog = f"Loaded operator key ({colorama.Fore.MAGENTA}{data['pubkey'][16:]}" + \
                     f"{colorama.Fore.RESET})"
 
             elif log[2] == "consensus client: connecting":
