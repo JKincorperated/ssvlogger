@@ -196,7 +196,7 @@ def main_function():
                 tolog = "Sucessfully submitted attestation at slot " + \
                     f"{colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
                     f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
-                
+
             elif log[2] == "Controller.Validator" and "got beacon block proposal" in log[3]:
                 data = json.loads(log[4])
                 role = data["role"]
