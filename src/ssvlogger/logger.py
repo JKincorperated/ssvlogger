@@ -40,6 +40,7 @@ def main():
         sys.exit(0)
     except Exception as error:
         print(f"{colorama.Fore.RED}Error: {error}{colorama.Fore.RESET}")
+        print(error.with_traceback())
         sys.exit(1)
 
 def main_function():
@@ -181,7 +182,7 @@ def main_function():
 
             elif log[2] == "Controller.Validator" and "starting duty processing" in log[3]:
                 data = json.loads(log[4])
-                role = data["role"]
+                role = data["beacon_role"] if "beacon_role" in data else data["role"]
                 slot = data["slot"]
                 validator = data["pubkey"][:6] + "..."
                 tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
@@ -190,7 +191,7 @@ def main_function():
 
             elif log[2] == "Controller.Validator" and "successfully submitted attestation" in log[3]:
                 data = json.loads(log[4])
-                role = data["role"]
+                role = data["beacon_role"] if "beacon_role" in data else data["role"]
                 slot = data["slot"]
                 validator = data["pubkey"][:6] + "..."
                 tolog = "Sucessfully submitted attestation at slot " + \
@@ -199,7 +200,7 @@ def main_function():
 
             elif log[2] == "Controller.Validator" and "got beacon block proposal" in log[3]:
                 data = json.loads(log[4])
-                role = data["role"]
+                role = data["beacon_role"] if "beacon_role" in data else data["role"]
                 slot = data["slot"]
                 validator = data["pubkey"][:6] + "..."
                 tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
@@ -274,9 +275,9 @@ def main_function():
 
             elif log[2] == "setting ssv network":
                 data = json.loads(log[3])
+                print(data)
                 tolog = f"Configuring SSV node for running on {colorama.Fore.MAGENTA}" + \
-                    f"{data['network']}{colorama.Fore.RESET} with MEV {colorama.Fore.MAGENTA}" + \
-                    f"{data['builderProposals(MEV)']}{colorama.Fore.RESET}"
+                    f"{data['network']}{colorama.Fore.RESET}"
 
             elif log[2] == "applying migrations":
                 data = json.loads(log[3])
