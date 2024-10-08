@@ -30,6 +30,16 @@ def extract_time_and_stat(log, DOCKER_MODE):
 
     return time, stat
 
+def seconds_to_ms_or_s(from_log: str):
+    """Converts seconds to milliseconds or seconds"""
+
+    try:
+        if float(from_log) < 1.5:
+            return f"{float(from_log)*1000:.2f} ms"
+        return f"{float(from_log):.2f} s"
+    except ValueError:
+        return f"{from_log}s"
+
 def main():
     """Error handling function and soft exit"""
 
@@ -39,9 +49,16 @@ def main():
         print("\nExiting...")
         sys.exit(0)
     except Exception as error:
-        print(f"{colorama.Fore.RED}Error: {error}{colorama.Fore.RESET}")
-        print(error.with_traceback())
+        print(f"{colorama.Fore.RED}SSVLogger Error: {error}{colorama.Fore.RESET}")
         sys.exit(1)
+
+MATCHES = {
+    "AGGREGATOR_RUNNER": "Aggregator / Attestor",
+    "VALIDATOR_REGISTRATION_RUNNER": "Validator registration",
+    "VALIDATOR_REGISTRATION": "Validator registration",
+    "AGGREGATOR": "Aggregator",
+    "ATTESTER": "Attestor",
+}
 
 def main_function():
     """Main function"""
@@ -177,12 +194,30 @@ def main_function():
                 data = json.loads(log[4])
                 tolog = f"Received indices change {data['handler']}"
 
+            elif log[2] == "DutyScheduler" and "✅ successfully submitted attestations" in log[3]:
+                data = json.loads(log[4])
+                commitee = data['committee_id'][:12] + "..."
+                tolog = f"{colorama.Fore.GREEN}Successfully submitted attestations{colorama.Fore.RESET} for slot {colorama.Fore.LIGHTMAGENTA_EX}{data['slot']}" + \
+                    f"{colorama.Fore.RESET} in committee {colorama.Fore.LIGHTMAGENTA_EX}{commitee}{colorama.Fore.RESET}" + \
+                    f"in {seconds_to_ms_or_s(data['total_consensus_time'])}"
+
+            elif log[2] == "DutyScheduler" and "starting duty processing" in log[3]:
+                data = json.loads(log[4])
+                commitee = data['committee_id'][:12] + "..."
+                tolog = f"Running duty for slot {colorama.Fore.LIGHTMAGENTA_EX}{data['slot']}" + \
+                    f"{colorama.Fore.RESET} in committee {colorama.Fore.LIGHTMAGENTA_EX}{commitee}{colorama.Fore.RESET}"
+
+            elif log[2] == "DutyScheduler" and "❗no committee runner found for slot" in log[3]:
+                data = json.loads(log[4])
+                tolog = f"No committee runner found for slot {colorama.Fore.LIGHTMAGENTA_EX}{data['slot']}" + \
+                    f"{colorama.Fore.RESET} in committee {colorama.Fore.LIGHTMAGENTA_EX}{data['committee_id'][:12]}..."
 
             # Controller
 
             elif log[2] == "Controller.Validator" and "starting duty processing" in log[3]:
                 data = json.loads(log[4])
                 role = data["beacon_role"] if "beacon_role" in data else data["role"]
+                role = MATCHES[role] if role in MATCHES else role
                 slot = data["slot"]
                 validator = data["pubkey"][:6] + "..."
                 tolog = f"Processing {colorama.Fore.LIGHTMAGENTA_EX}{role}{colorama.Fore.RESET}" + \
@@ -197,6 +232,12 @@ def main_function():
                 tolog = "Sucessfully submitted attestation at slot " + \
                     f"{colorama.Fore.LIGHTMAGENTA_EX}{slot}{colorama.Fore.RESET}" + \
                     f" for validator {colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
+                
+            elif log[2] == "Controller.Validator" and "successfully submitted sync committee" in log[3]:
+                data = json.loads(log[4])
+                validator = data["pubkey"][:6] + "..."
+                tolog = "Sucessfully submitted sync committee message for validator " + \
+                    f"{colorama.Fore.LIGHTMAGENTA_EX}{validator}{colorama.Fore.RESET}"
 
             elif log[2] == "Controller.Validator" and "got beacon block proposal" in log[3]:
                 data = json.loads(log[4])
