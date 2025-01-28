@@ -92,6 +92,9 @@ def main_function():
 
         time, stat = extract_time_and_stat(log, DOCKER_MODE)
 
+        if "DEBUG" in stat and NOSPAM:
+            continue
+
         try:
             # P2P network
 
