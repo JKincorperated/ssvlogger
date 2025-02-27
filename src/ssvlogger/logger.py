@@ -351,10 +351,11 @@ def main_function():
                 tolog = f"Running {MATCHES[data['role']]} duty for slot {colorama.Fore.LIGHTMAGENTA_EX}{data['slot']}" + \
                     f"{colorama.Fore.RESET} in committee {colorama.Fore.LIGHTMAGENTA_EX}{data['committee_id'][:12]}..."
 
-            # elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
-            #     data = json.loads(log[4])
-            #     tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}." + \
-            #         f" Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '\"').replace('\\n', '\n')}{colorama.Fore.RESET}"
+            elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
+                data = json.loads(log[4])
+                err = data['error'].replace('\\"', '\"').replace('\\n', '\n')
+                tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}." + \
+                    f" Error: {colorama.Fore.LIGHTRED_EX}{err}{colorama.Fore.RESET}"
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
@@ -368,12 +369,13 @@ def main_function():
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "could not execute committee duty":
                 data = json.loads(log[4])
-                tolog = f"Failed to execute committee duty for {MATCHES[data['handler']]} duty at {colorama.Fore.CYAN}slot {data['slot']}{colorama.Fore.RESET}. Error {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '"').replace('\\n', '\n')}{colorama.Fore.RESET}"
+                err = data['error'].replace('\\"', '\"').replace('\\n', '\n')
+                tolog = f"Failed to execute committee duty for {MATCHES[data['handler']]} duty at {colorama.Fore.CYAN}slot {data['slot']}{colorama.Fore.RESET}." + \
+                    f"Error {colorama.Fore.LIGHTRED_EX}{err}{colorama.Fore.RESET}"
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "starting duty handler":
                 data = json.loads(log[4])
                 tolog = f"Starting {MATCHES[data['handler']]} duty handler"
-
 
             # Miscellaneous log handling
 
