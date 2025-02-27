@@ -351,10 +351,10 @@ def main_function():
                 tolog = f"Running {MATCHES[data['role']]} duty for slot {colorama.Fore.LIGHTMAGENTA_EX}{data['slot']}" + \
                     f"{colorama.Fore.RESET} in committee {colorama.Fore.LIGHTMAGENTA_EX}{data['committee_id'][:12]}..."
 
-            elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
-                data = json.loads(log[4])
-                tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}." + \
-                    f" Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '\"').replace('\\n', '\n')}{colorama.Fore.RESET}"
+            # elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
+            #     data = json.loads(log[4])
+            #     tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}." + \
+            #         f" Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '\"').replace('\\n', '\n')}{colorama.Fore.RESET}"
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
