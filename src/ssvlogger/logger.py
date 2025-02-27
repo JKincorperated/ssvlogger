@@ -353,7 +353,7 @@ def main_function():
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
-                tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}. Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace("\\\"", "\"").replace("\\n", "\n")}{colorama.Fore.RESET}"
+                tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}. Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '\"').replace('\\n', '\n')}{colorama.Fore.RESET}"
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
@@ -367,7 +367,7 @@ def main_function():
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "could not execute committee duty":
                 data = json.loads(log[4])
-                tolog = f"Failed to execute committee duty for {MATCHES[data['handler']]} duty at {colorama.Fore.CYAN}slot {data['slot']}{colorama.Fore.RESET}. Error {colorama.Fore.LIGHTRED_EX}{data['error'].replace("\\\"", "\"").replace("\\n", "\n")}{colorama.Fore.RESET}"
+                tolog = f"Failed to execute committee duty for {MATCHES[data['handler']]} duty at {colorama.Fore.CYAN}slot {data['slot']}{colorama.Fore.RESET}. Error {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '"').replace('\\n', '\n')}{colorama.Fore.RESET}"
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "starting duty handler":
                 data = json.loads(log[4])
