@@ -234,9 +234,9 @@ def main_function():
 
             elif log[2] == "consensus_client" and "retrieved fork epochs" in log[3]:
                 data = json.loads(log[4])
-                tolog = f"Retrieved fork epochs from consensus client. "
+                tolog = "Retrieved fork epochs from consensus client. "
                 for key, value in data.items():
-                    if key == "node_addr" or key == "current_data_version":
+                    if key in ["node_addr", "current_data_version"]:
                         continue
                     tolog += f"{key}: {colorama.Fore.CYAN}{value}{colorama.Fore.RESET} "
 
@@ -289,7 +289,7 @@ def main_function():
                 data = json.loads(log[4])
                 tolog = f"Skipping setup for validator {colorama.Fore.RED}{data['pubkey'][:8]}" + \
                     f"{colorama.Fore.RESET} until it becomes active on beacon chain."
-                
+
             elif log[2] == "Controller" and log[3] == "recording validator status":
                 data = json.loads(log[4])
                 tolog = f"Validators currently {colorama.Fore.CYAN}{data['status']}{colorama.Fore.RESET}: {colorama.Fore.LIGHTMAGENTA_EX}{data['count']}{colorama.Fore.RESET}"
@@ -353,7 +353,8 @@ def main_function():
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
-                tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}. Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '\"').replace('\\n', '\n')}{colorama.Fore.RESET}"
+                tolog = f"Failed to submit beacon commitee subscribtion for role {MATCHES[data['handler']]}." + \
+                    f" Error: {colorama.Fore.LIGHTRED_EX}{data['error'].replace('\\"', '\"').replace('\\n', '\n')}{colorama.Fore.RESET}"
 
             elif log[2] == "Operator.DutyScheduler" and log[3] == "failed to submit beacon committee subscription":
                 data = json.loads(log[4])
